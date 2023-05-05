@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-
+import Search from './search';
 
 const Header = () => {
   return (
@@ -12,7 +12,7 @@ const Header = () => {
                 </Link>
             </div>
             <div className="navigation">
-                <input type="text" placeholder="Stadt suchen" />
+                <Search />
                 <nav>
                     <Link href="/about">About</Link>
                 </nav>

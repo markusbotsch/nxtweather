@@ -1,32 +1,42 @@
 import React from 'react'
 
-async function fetchData( { city }) {
+async function fetchData(lon, lat) {
 
     const apikey = process.env.APIKEY_OPENWEATHER;
+    const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=de&appid=${apikey}`,
+        { next: {
+            revalidate: 3600
+        }});
 
-    const locationResponse = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=3&appid=${apikey}`);
-
-    const locationData = await locationResponse.json();
-
-    console.log(locationData);
-
-    const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${locationData[0].lat}&lon=${locationData[0].lon}&units=metric&lang=de&appid=${apikey}`);
+    if(!weatherResponse.ok) {
+        throw new Error('Failed to fetch data!')
+    }
 
     const data = await weatherResponse.json()
 
     return data;
 }
 
-const CityCardSm = async ({ city } ) => {
+const CityCardSm = async ( { location: {lon, lat} } ) => {
 
-    const weather = await fetchData({city});
+    const weather = await fetchData(lon, lat);
 
-    console.log(weather);
-  return (
-    <div className='city-card-sm'>
-        {weather.name}
-        <p className="temp">{Math.round(weather.main.temp)}°</p>
-    </div>
+    return (
+        <div className='city-card-sm card-content'>
+            <div>
+                <h3>{weather.name}</h3>
+                <p>{weather.weather[0].description}</p>
+            </div>
+            <div>
+                <img src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@4x.png`} alt=""/> 
+                <p className="temp">{Math.round(weather.main.temp)}°</p>
+                <p className='temp-min-max'>
+                     Min: {Math.round(weather.main.temp_min)}° | Max: {Math.round(weather.main.temp_max)}°<br />
+                </p>
+                
+            </div>
+            
+        </div>
   )
 }
 
